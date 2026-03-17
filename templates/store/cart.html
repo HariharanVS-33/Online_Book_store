@@ -1,0 +1,94 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Your Cart — PageTurn{% endblock %}
+
+{% block content %}
+<div class="cart-wrapper">
+  <div class="container">
+    <h1 class="cart-title">🛒 Your Cart</h1>
+
+    {% if cart.items.all %}
+      <div class="cart-grid">
+        <!-- Items -->
+        <div class="cart-items">
+          {% for item in cart.items.all %}
+            <div class="cart-item">
+              <div class="cart-item-image">
+                {% if item.book.cover_image %}
+                  <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.title }}">
+                {% else %}
+                  {% if item.book.category.icon %}{{ item.book.category.icon }}{% else %}📚{% endif %}
+                {% endif %}
+              </div>
+              <div class="cart-item-info">
+                <div class="cart-item-title">
+                  <a href="{% url 'book_detail' item.book.pk %}">{{ item.book.title }}</a>
+                </div>
+                <div class="cart-item-author">{{ item.book.author }}</div>
+                <div class="cart-item-price">₹{{ item.book.price }}</div>
+
+                <!-- Quantity Control -->
+                <div class="cart-qty-control">
+                  <form method="post" action="{% url 'update_cart' item.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
+                    <button type="submit" class="qty-btn">−</button>
+                  </form>
+                  <span class="qty-display">{{ item.quantity }}</span>
+                  <form method="post" action="{% url 'update_cart' item.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
+                    <button type="submit" class="qty-btn">+</button>
+                  </form>
+                  <span style="margin-left:8px; color:var(--text-muted);">
+                    = ₹{{ item.subtotal }}
+                  </span>
+                </div>
+              </div>
+              <!-- Remove -->
+              <form method="post" action="{% url 'remove_from_cart' item.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="remove-btn" title="Remove">✕</button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Summary -->
+        <div class="cart-summary">
+          <div class="summary-title">Order Summary</div>
+          {% for item in cart.items.all %}
+            <div class="summary-row">
+              <span>{{ item.book.title|truncatechars:25 }} ×{{ item.quantity }}</span>
+              <span>₹{{ item.subtotal }}</span>
+            </div>
+          {% endfor %}
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span style="color:#2ecc71;">Free</span>
+          </div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="total-price">₹{{ cart.total }}</span>
+          </div>
+          <a href="{% url 'checkout' %}" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">
+            Proceed to Checkout →
+          </a>
+          <a href="{% url 'book_list' %}" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;">
+            ← Continue Shopping
+          </a>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added any books yet. Start exploring!</p>
+        <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">Browse Books</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% load static %}
+<a href="{% url 'book_detail' book.pk %}" class="book-card">
+  <div class="book-cover">
+    {% if book.cover_image %}
+      <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+    {% else %}
+      <div class="book-cover-placeholder">
+        <span class="book-emoji">
+          {% if book.category.icon %}{{ book.category.icon }}{% else %}📚{% endif %}
+        </span>
+        <span class="book-title-short">{{ book.title }}</span>
+      </div>
+    {% endif %}
+
+    {% if book.is_bestseller %}
+      <span class="book-badge badge-bestseller">Bestseller</span>
+    {% elif book.is_new_arrival %}
+      <span class="book-badge badge-new">New</span>
+    {% elif book.is_audiobook %}
+      <span class="book-badge badge-audio">🎧 Audio</span>
+    {% endif %}
+
+    <div class="card-overlay">
+      <span class="btn btn-primary btn-sm">View Details</span>
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_to_cart' book.pk %}" onclick="event.stopPropagation()">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-sm">Add to Cart 🛒</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-ghost btn-sm" onclick="event.stopPropagation()">Add to Cart 🛒</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="book-info">
+    <div class="book-title">{{ book.title }}</div>
+    <div class="book-author">{{ book.author }}</div>
+    <div class="book-rating">
+      <span class="stars">
+        {% with rating=book.rating|floatformat:0 %}
+          {% for i in "12345" %}★{% endfor %}
+        {% endwith %}
+      </span>
+      <span class="rating-count">{{ book.rating }}</span>
+    </div>
+    <div class="book-price">₹{{ book.price }}</div>
+    {% if book.category %}
+      <span class="book-category-tag">{{ book.category.icon }} {{ book.category.name }}</span>
+    {% endif %}
+  </div>
+</a>

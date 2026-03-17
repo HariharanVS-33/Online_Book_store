@@ -1,0 +1,41 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Login — PageTurn{% endblock %}
+{% block newsletter %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="brand">Page<span>Turn</span></div>
+    </div>
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-sub">Sign in to continue your reading journey</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Your username" autofocus required>
+        {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Your password" required>
+        {% if form.password.errors %}<div class="form-error">{{ form.password.errors.0 }}</div>{% endif %}
+      </div>
+      {% if form.non_field_errors %}
+        <div class="form-error" style="margin-bottom:12px;">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">
+        Sign In →
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="{% url 'register' %}">Sign Up</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

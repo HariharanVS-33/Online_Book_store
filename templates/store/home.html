@@ -1,0 +1,125 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}PageTurn — Discover Your Next Favourite Book{% endblock %}
+
+{% block content %}
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">✨ &nbsp;AI-Powered Book Summaries</div>
+      <h1>
+        Find Books That<br>
+        <span class="accent">Move You.</span>
+      </h1>
+      <p>Explore thousands of handpicked titles across every genre. From bestsellers to hidden gems — your next great read is waiting.</p>
+      <div class="hero-actions">
+        <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">Browse Books →</a>
+        <a href="#categories" class="btn btn-outline btn-lg">Explore Categories</a>
+      </div>
+
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-value">15+</div>
+          <div class="hero-stat-label">Books Available</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">5</div>
+          <div class="hero-stat-label">Categories</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">AI</div>
+          <div class="hero-stat-label">Powered Summaries</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating book emojis -->
+  <div class="hero-visual">
+    <div class="floating-books">
+      {% with emojis="📖,📚,🔬,🧠,💻,🎓,📕,📗,📘" %}
+        {% for emoji in emojis.split %}
+          <div class="floating-book">{{ emoji }}</div>
+        {% endfor %}
+      {% endwith %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CATEGORIES STRIP ── -->
+<section class="categories-strip" id="categories">
+  <div class="container">
+    <div class="categories-scroll">
+      <a href="{% url 'book_list' %}" class="category-pill {% if not selected_category %}active{% endif %}">
+        <span class="pill-icon">🌟</span> All Books
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'category_books' cat.slug %}" class="category-pill">
+          <span class="pill-icon">{{ cat.icon }}</span> {{ cat.name }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── BESTSELLERS ── -->
+{% if bestsellers %}
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🔥 Best <span>Sellers</span></h2>
+        <p class="section-subtitle">The most loved books by our readers right now</p>
+      </div>
+      <a href="{% url 'book_list' %}" class="view-all">View All →</a>
+    </div>
+    <div class="books-grid books-grid-lg">
+      {% for book in bestsellers %}
+        {% include 'store/partials/book_card.html' %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── NEW ARRIVALS ── -->
+{% if new_arrivals %}
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">✨ New <span>Arrivals</span></h2>
+        <p class="section-subtitle">Fresh off the shelves — just added to our collection</p>
+      </div>
+      <a href="{% url 'book_list' %}" class="view-all">View All →</a>
+    </div>
+    <div class="books-grid books-grid-lg">
+      {% for book in new_arrivals %}
+        {% include 'store/partials/book_card.html' %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── AUDIOBOOKS ── -->
+{% if audiobooks %}
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🎧 Audio<span>books</span></h2>
+        <p class="section-subtitle">Listen on the go — great stories in your ears</p>
+      </div>
+    </div>
+    <div class="books-grid">
+      {% for book in audiobooks %}
+        {% include 'store/partials/book_card.html' %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

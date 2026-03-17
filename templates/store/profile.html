@@ -1,0 +1,74 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}My Profile — PageTurn{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+  <div class="container">
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-avatar">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <div>
+        <div class="profile-name">{{ user.first_name }} {{ user.last_name }}</div>
+        <div class="profile-email">{{ user.email }}</div>
+        <div style="margin-top:8px;font-size:0.85rem;color:var(--text-muted);">
+          📅 Member since {{ user.date_joined|date:"F Y" }} &nbsp;•&nbsp;
+          📦 {{ orders.count }} order{{ orders.count|pluralize }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders -->
+    <h2 style="font-family:var(--font-serif);font-size:1.6rem;font-weight:700;margin-bottom:24px;">
+      📦 Order History
+    </h2>
+
+    {% if orders %}
+      <div style="overflow-x:auto;">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>{{ order.created_at|date:"d M Y" }}</td>
+                <td>
+                  {% for item in order.items.all %}
+                    <div style="font-size:0.82rem;color:var(--text-secondary);">
+                      {{ item.book.title|default:"Book"|truncatechars:28 }} ×{{ item.quantity }}
+                    </div>
+                  {% endfor %}
+                </td>
+                <td><strong style="color:var(--accent);">₹{{ order.total }}</strong></td>
+                <td>
+                  <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No orders yet</h3>
+        <p>Start browsing and place your first order!</p>
+        <a href="{% url 'book_list' %}" class="btn btn-primary btn-lg">Browse Books</a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

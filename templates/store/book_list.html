@@ -1,0 +1,61 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Browse Books — PageTurn{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:40px; padding-bottom:60px;">
+
+  <!-- Search bar -->
+  <form class="search-bar" method="get" action="{% url 'book_list' %}">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search by title or author...">
+    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if query or selected_category %}
+      <a href="{% url 'book_list' %}" class="btn btn-ghost">Clear</a>
+    {% endif %}
+  </form>
+
+  <div class="filter-layout">
+    <!-- Sidebar -->
+    <aside class="filter-sidebar">
+      <div class="filter-heading">📂 Categories</div>
+      <a href="{% url 'book_list' %}" class="filter-option {% if not selected_category %}active{% endif %}">
+        <span class="option-icon">🌟</span> All Books
+      </a>
+      {% for cat in categories %}
+        <a href="{% url 'category_books' cat.slug %}" class="filter-option {% if selected_category == cat.slug %}active{% endif %}">
+          <span class="option-icon">{{ cat.icon }}</span> {{ cat.name }}
+          <span style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">{{ cat.books.count }}</span>
+        </a>
+      {% endfor %}
+    </aside>
+
+    <!-- Book grid -->
+    <div>
+      {% if query or selected_category %}
+        <div style="margin-bottom:20px; color:var(--text-secondary); font-size:0.9rem;">
+          {% if query %}Results for "<strong style="color:var(--text-primary)">{{ query }}</strong>"{% endif %}
+          {% if selected_category %}in <strong style="color:var(--accent)">{{ category.name|default:selected_category }}</strong>{% endif %}
+          — {{ books.count }} book{{ books.count|pluralize }} found
+        </div>
+      {% endif %}
+
+      {% if books %}
+        <div class="books-grid books-grid-lg">
+          {% for book in books %}
+            {% include 'store/partials/book_card.html' %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3>No books found</h3>
+          <p>Try a different search term or browse all categories.</p>
+          <a href="{% url 'book_list' %}" class="btn btn-primary">Browse All Books</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

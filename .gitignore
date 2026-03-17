@@ -1,0 +1,70 @@
+# ─── Project Documents ────────────────────────────────
+DOC-*
+*.pdf
+
+# ─── Python ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# ─── Virtual Environments ─────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+.env.bak
+
+# ─── Django ───────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# ─── Environment / Secrets ────────────────────────────
+.env
+# Keep .env.example (tracked — it has no real secrets)
+!.env.example
+
+# ─── IDE / Editors ────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Testing ──────────────────────────────────────────
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ─── Jupyter ──────────────────────────────────────────
+.ipynb_checkpoints
+
+# ─── Node (if any frontend tooling is added later) ───
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

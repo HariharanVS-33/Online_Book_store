@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PageTurn — Online Book Store{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Discover your next favourite book. Browse thousands of titles across every genre.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="{% url 'home' %}" class="nav-brand">
+      <div class="nav-logo-icon">📚</div>
+      Page<span class="accent">Turn</span>
+    </a>
+
+    <form class="nav-search" action="{% url 'book_list' %}" method="get">
+      <span class="search-icon">🔍</span>
+      <input type="text" name="q" placeholder="Search books, authors..." value="{{ request.GET.q }}">
+    </form>
+
+    <ul class="nav-links">
+      <li><a href="{% url 'book_list' %}">Browse</a></li>
+      {% if user.is_authenticated %}
+        <li>
+          <a href="{% url 'cart' %}" class="cart-link">
+            🛒 Cart
+            {% if cart_count > 0 %}
+              <span class="cart-badge">{{ cart_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'profile' %}">👤 {{ user.first_name|default:user.username }}</a>
+        </li>
+        <li>
+          <form method="post" action="{% url 'logout' %}" style="display:inline">
+            {% csrf_token %}
+            <button type="submit" style="background:none;border:none;cursor:pointer;font:inherit;color:var(--text-secondary);padding:8px 14px;border-radius:6px;font-size:0.9rem;font-weight:500;transition:all 0.3s ease;">
+              Logout
+            </button>
+          </form>
+        </li>
+      {% else %}
+        <li><a href="{% url 'login' %}" class="btn btn-outline btn-sm">Login</a></li>
+        <li><a href="{% url 'register' %}" class="btn btn-primary btn-sm">Sign Up</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── NEWSLETTER ── -->
+{% block newsletter %}
+<section class="newsletter-section">
+  <div class="container">
+    <div class="newsletter-content">
+      <div style="font-size:2.5rem;margin-bottom:12px;">✉️</div>
+      <h2 class="newsletter-title">Stay in the <span style="color:var(--accent)">Loop</span></h2>
+      <p class="newsletter-sub">Get curated book recommendations, exclusive deals, and new arrival alerts straight to your inbox.</p>
+      <form class="newsletter-form" id="newsletterForm">
+        {% csrf_token %}
+        <input type="email" id="subscribeEmail" placeholder="Enter your email..." required>
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+      </form>
+      <p id="subscribeMsg" style="margin-top:12px;font-size:0.85rem;display:none;"></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Page<span>Turn</span></div>
+        <p class="footer-desc">Your premium destination for books across every genre. Discover stories that move you, knowledge that shapes you.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Explore</div>
+        <ul class="footer-links">
+          <li><a href="{% url 'book_list' %}">All Books</a></li>
+          {% for cat in categories_global %}
+            <li><a href="{% url 'category_books' cat.slug %}">{{ cat.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Account</div>
+        <ul class="footer-links">
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">My Orders</a></li>
+            <li><a href="{% url 'cart' %}">Cart</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      <div>
+        <div class="footer-heading">Info</div>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 PageTurn. All rights reserved.</span>
+      <span>Built with Django & ❤️</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ── TOAST CONTAINER ── -->
+<div class="toast-container" id="toastContainer">
+  {% for message in messages %}
+    <div class="toast {{ message.tags }}" id="toast-{{ forloop.counter }}">
+      <span>
+        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+      </span>
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+// Navbar scroll effect
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// Auto-dismiss toasts
+document.querySelectorAll('.toast').forEach((toast, i) => {
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(120%)';
+    toast.style.transition = 'all 0.4s ease';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500 + i * 500);
+});
+
+// Newsletter AJAX
+const newsletterForm = document.getElementById('newsletterForm');
+if (newsletterForm) {
+  newsletterForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('subscribeEmail').value;
+    const msg = document.getElementById('subscribeMsg');
+    const btn = newsletterForm.querySelector('button');
+    btn.textContent = '...';
+    btn.disabled = true;
+    try {
+      const resp = await fetch("{% url 'subscribe' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `email=${encodeURIComponent(email)}`
+      });
+      const data = await resp.json();
+      msg.textContent = data.message;
+      msg.style.display = 'block';
+      msg.style.color = data.status === 'ok' ? '#2ecc71' : 'var(--gold)';
+      if (data.status === 'ok') newsletterForm.reset();
+    } catch {
+      msg.textContent = 'Something went wrong. Try again.';
+      msg.style.display = 'block';
+      msg.style.color = 'var(--accent)';
+    }
+    btn.textContent = 'Subscribe';
+    btn.disabled = false;
+  });
+}
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

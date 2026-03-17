@@ -1,0 +1,177 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}{{ book.title }} — PageTurn{% endblock %}
+{% block meta_description %}{{ book.description|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper">
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav style="font-size:0.85rem;color:var(--text-muted);margin-bottom:32px;">
+      <a href="{% url 'home' %}" style="color:var(--text-muted);">Home</a>
+      <span style="margin: 0 8px;">›</span>
+      <a href="{% url 'book_list' %}" style="color:var(--text-muted);">Books</a>
+      {% if book.category %}
+        <span style="margin: 0 8px;">›</span>
+        <a href="{% url 'category_books' book.category.slug %}" style="color:var(--text-muted);">{{ book.category.name }}</a>
+      {% endif %}
+      <span style="margin: 0 8px;">›</span>
+      <span style="color:var(--text-primary);">{{ book.title|truncatechars:40 }}</span>
+    </nav>
+
+    <div class="detail-grid">
+      <!-- Cover -->
+      <div>
+        <div class="detail-cover">
+          {% if book.cover_image %}
+            <img src="{{ book.cover_image.url }}" alt="{{ book.title }}">
+          {% else %}
+            <div class="book-cover-placeholder" style="height:100%;">
+              <span style="font-size:5rem;">{% if book.category.icon %}{{ book.category.icon }}{% else %}📚{% endif %}</span>
+              <span style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);text-align:center;padding:0 16px;">{{ book.title }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div>
+        {% if book.category %}
+          <a href="{% url 'category_books' book.category.slug %}" class="detail-category-link">
+            {{ book.category.icon }} {{ book.category.name }}
+          </a>
+        {% endif %}
+
+        <h1 class="detail-title">{{ book.title }}</h1>
+        <p class="detail-author">by <strong>{{ book.author }}</strong></p>
+
+        <!-- Badges -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+          {% if book.is_bestseller %}<span class="book-badge badge-bestseller">🔥 Bestseller</span>{% endif %}
+          {% if book.is_new_arrival %}<span class="book-badge badge-new">✨ New Arrival</span>{% endif %}
+          {% if book.is_audiobook %}<span class="book-badge badge-audio">🎧 Audiobook</span>{% endif %}
+        </div>
+
+        <!-- Rating -->
+        <div class="book-rating" style="margin-bottom:20px;">
+          <span class="stars" style="font-size:1.1rem;">★★★★★</span>
+          <span style="font-size:1rem;font-weight:600;margin-left:4px;">{{ book.rating }}</span>
+          <span class="rating-count" style="font-size:0.85rem;">/ 5.0</span>
+        </div>
+
+        <!-- Meta -->
+        <div class="detail-meta">
+          <div class="meta-item">
+            <div class="meta-label">Pages</div>
+            <div class="meta-value">{{ book.pages }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Language</div>
+            <div class="meta-value">{{ book.language }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Year</div>
+            <div class="meta-value">{{ book.published_year }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Stock</div>
+            <div class="meta-value" style="color:#2ecc71;">{{ book.stock }} left</div>
+          </div>
+          {% if book.isbn %}
+          <div class="meta-item">
+            <div class="meta-label">ISBN</div>
+            <div class="meta-value" style="font-size:0.8rem;">{{ book.isbn }}</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        {% if book.description %}
+          <p class="detail-description">{{ book.description }}</p>
+        {% endif %}
+
+        <!-- Price + Actions -->
+        <div class="detail-price-row">
+          <div class="detail-price">₹{{ book.price }}</div>
+          <div class="detail-stock">✅ In Stock</div>
+        </div>
+
+        <div class="detail-actions">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_to_cart' book.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary btn-lg">🛒 Add to Cart</button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">🛒 Add to Cart</a>
+          {% endif %}
+          <a href="{% url 'book_list' %}" class="btn btn-outline btn-lg">← Browse More</a>
+        </div>
+
+        <!-- AI Summary Panel -->
+        <div class="ai-panel">
+          <div class="ai-panel-header">
+            <div class="ai-icon">🤖</div>
+            <div>
+              <div class="ai-panel-title">AI Book Summary</div>
+              <div class="ai-panel-sub">Powered by Google Gemini</div>
+            </div>
+          </div>
+
+          <div id="aiContent">
+            {% if ai_summary %}
+              <p class="ai-summary-text">{{ ai_summary }}</p>
+            {% else %}
+              <p class="ai-summary-text" style="color:var(--text-muted); margin-bottom:16px;">
+                Click below to get an instant AI-powered summary of this book.
+              </p>
+              <button class="ai-get-btn" id="getSummaryBtn" onclick="fetchSummary({{ book.pk }})">
+                ✨ Generate AI Summary
+                <span class="ai-spinner" id="aiSpinner"></span>
+              </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Books -->
+    {% if related_books %}
+    <div class="section-sm">
+      <div class="section-header">
+        <h2 class="section-title">You May Also <span>Like</span></h2>
+      </div>
+      <div class="books-grid">
+        {% for book in related_books %}
+          {% include 'store/partials/book_card.html' %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function fetchSummary(bookId) {
+  const btn = document.getElementById('getSummaryBtn');
+  const spinner = document.getElementById('aiSpinner');
+  const content = document.getElementById('aiContent');
+
+  btn.disabled = true;
+  spinner.classList.add('active');
+
+  try {
+    const resp = await fetch(`/books/${bookId}/?get_summary=1`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    const data = await resp.json();
+    content.innerHTML = `<p class="ai-summary-text">${data.summary}</p>`;
+  } catch {
+    content.innerHTML = `<p class="ai-summary-text" style="color:var(--accent);">Failed to load summary. Please try again.</p>`;
+  }
+}
+</script>
+{% endblock %}
