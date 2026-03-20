@@ -91,5 +91,5 @@ LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Gemini API
-GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+# Groq API
+GROQ_API_KEY = config('GROQ_API_KEY', default='')
